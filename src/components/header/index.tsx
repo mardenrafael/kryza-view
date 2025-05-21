@@ -1,12 +1,15 @@
 "use client";
 
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
+import { getSubdomain } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -19,15 +22,7 @@ export function Header() {
         </Link>
         <div className="flex items-center gap-4">
           <div className="hidden md:flex items-center gap-4">
-            <Link href="/login">
-              <Button variant="outline" size="sm">
-                Entrar
-              </Button>
-            </Link>
-            <Link href="/signup">
-              <Button size="sm">Cadastrar</Button>
-            </Link>
-            <ThemeToggle />
+            <HeaderActions />
           </div>
 
           <AnimatePresence mode="wait" initial={false}>
@@ -70,20 +65,59 @@ export function Header() {
             exit={{ height: 0 }}
             className="flex flex-col items-center gap-4 overflow-hidden md:hidden px-4 pb-4"
           >
-            <Link href="/login" onClick={() => setMenuOpen(false)}>
-              <Button variant="outline" size="sm" className="w-full">
-                Entrar
-              </Button>
-            </Link>
-            <Link href="/signup" onClick={() => setMenuOpen(false)}>
-              <Button size="sm" className="w-full">
-                Cadastrar
-              </Button>
-            </Link>
-            <ThemeToggle />
+            <HeaderActions />
           </motion.div>
         )}
       </AnimatePresence>
     </header>
+  );
+}
+
+function HeaderActions() {
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const host = window.location.host;
+
+    const isProd = process.env.NODE_ENV === "production";
+    const protocol = isProd ? "https" : "http";
+
+    const redirectUrl = `${protocol}://${host}`;
+
+    await signOut({
+      redirect: false,
+    });
+
+    router.push(redirectUrl);
+  };
+
+  return (
+    <>
+      {!session ? (
+        <>
+          <Link href="/login">
+            <Button variant="outline" size="sm" className="cursor-pointer">
+              Entrar
+            </Button>
+          </Link>
+          <Link href="/signup">
+            <Button size="sm" className="cursor-pointer">
+              Cadastrar
+            </Button>
+          </Link>
+        </>
+      ) : (
+        <Button
+          variant="outline"
+          size="sm"
+          className="cursor-pointer"
+          onClick={handleLogout}
+        >
+          Logout
+        </Button>
+      )}
+      <ThemeToggle />
+    </>
   );
 }

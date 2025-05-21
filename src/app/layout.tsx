@@ -1,6 +1,7 @@
 import "@/app/globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
 import type { Metadata } from "next";
+import { SessionProvider } from "next-auth/react";
 import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
 
@@ -25,10 +26,12 @@ export default function RootLayout({
       <body
         className={`min-h-screen bg-background font-sans ${inter.variable}`}
       >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Toaster richColors />
-          {children}
-        </ThemeProvider>
+        <SessionProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <Toaster richColors />
+            {children}
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );

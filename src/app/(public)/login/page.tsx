@@ -1,5 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SignInForm } from "./components/signin-form";
+import { Metadata } from "next";
+import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Login",
+};
 
 export default async function LoginPage() {
   return (
@@ -15,9 +21,9 @@ export default async function LoginPage() {
             <SignInForm />
             <p className="mt-4 text-sm text-center text-foreground">
               Não tem uma conta?{" "}
-              <a href="/register" className="text-primary hover:underline">
+              <Link href="/signup" className="text-primary hover:underline">
                 Cadastre-se
-              </a>
+              </Link>
             </p>
           </CardContent>
         </Card>

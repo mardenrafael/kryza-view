@@ -12,11 +12,14 @@ import { Control } from "react-hook-form";
 type PasswordFieldProps = {
   control: Control<any, any, any>;
   name?: string;
+  label?: string;
 } & ComponentProps<"input">;
 
 export function PasswordField({
   control,
   name = "password",
+  label = "Senha",
+  placeholder = "Digite sua senha",
   className,
   ...rest
 }: PasswordFieldProps) {
@@ -28,7 +31,7 @@ export function PasswordField({
         return (
           <FormItem>
             <FormLabel className="block text-sm font-medium text-primary">
-              Senha
+              {label}
             </FormLabel>
             <FormControl>
               <Input
@@ -36,7 +39,7 @@ export function PasswordField({
                 {...rest}
                 value={field.value || ""}
                 type="password"
-                placeholder="Digite sua senha"
+                placeholder={placeholder}
                 className={cn("mt-1", className)}
               />
             </FormControl>

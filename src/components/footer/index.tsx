@@ -12,12 +12,10 @@ export function Footer() {
       className="w-full border-t border-border bg-background py-6"
     >
       <div className="container mx-auto flex flex-col md:flex-row items-center justify-between px-4 sm:px-6 lg:px-8 text-muted-foreground text-sm">
-        {/* Texto de Copyright */}
         <div className="mb-4 md:mb-0">
           © {new Date().getFullYear()} Kryza. Todos os direitos reservados.
         </div>
 
-        {/* Links */}
         <div className="flex space-x-6">
           <Link
             href="/termos"

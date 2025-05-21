@@ -4,7 +4,7 @@ import { commonAnimation } from "@/config/animation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
-export default function LandingPageClienteFinal() {
+export default function Page() {
   return (
     <div className="flex flex-col space-y-24">
       <section className="min-h-[80vh] flex flex-col justify-center items-center text-center space-y-6 px-4">

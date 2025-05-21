@@ -3,7 +3,10 @@ import { Header } from "@/components/header";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Kryza | Solicite Análise do Seu Imóvel",
+  title: {
+    default: "Kryza | Avaliação de Imóveis Online",
+    template: "Kryza | %s",
+  },
   description:
     "Crie pedidos de análise de imóvel de forma rápida, prática e segura com a Kryza.",
   keywords: ["Kryza", "Imóveis", "Análise de Imóveis", "Cadastro de Imóvel"],

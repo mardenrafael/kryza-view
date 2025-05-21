@@ -39,7 +39,7 @@ export function ThemeToggle() {
       <motion.button
         whileTap={{ rotate: 360 }}
         onClick={toggleTheme}
-        className="p-2 rounded-md border border-border"
+        className="p-2 rounded-md border border-border cursor-pointer hover:bg-accent hover:text-primary transition-colors duration-200"
       >
         <motion.div
           animate={isChangingTheme ? { scale: [1, 1.2, 1] } : { scale: 1 }}

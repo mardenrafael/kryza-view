@@ -1,7 +1,26 @@
+import { signInSchema } from "@/lib/zod";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { signInSchema } from "@/lib/zod";
 import { ZodError } from "zod";
+import { isValidHash } from "./crypto";
+import PrismaInstance from "./prisma";
+import { getSubdomain } from "./utils";
+
+declare module "next-auth" {
+  interface Session {
+    tenantId: string;
+  }
+
+  interface User {
+    tenantId: string;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    tenantId: string;
+  }
+}
 
 export const { auth, handlers, signIn } = NextAuth({
   providers: [
@@ -18,23 +37,42 @@ export const { auth, handlers, signIn } = NextAuth({
           placeholder: "Sua senha",
         },
       },
-      authorize: async (credentials) => {
+      authorize: async (credentials, req: Request) => {
         try {
           const { email, password } = await signInSchema.parseAsync(
             credentials
           );
+          const host = req.headers.get("host");
+          const subdomain = getSubdomain(host);
 
-          console.log(email);
-          console.log(password);
+          if (!subdomain) return null;
 
-          if (email === "admin@admin.com" && password === "admin") {
-            return {
-              id: "1",
-              name: "Admin",
-              email: "admin@admin.com",
-            };
-          }
-          return null;
+          const tenant = await PrismaInstance.tenant.findUnique({
+            where: {
+              slug: subdomain,
+            },
+          });
+
+          if (!tenant) return null;
+
+          const user = await PrismaInstance.user.findFirst({
+            where: {
+              email,
+              tenantId: tenant.id,
+            },
+          });
+
+          if (!user) return null;
+
+          const isPasswordValid = await isValidHash(password, user.password);
+          if (!isPasswordValid) return null;
+
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            tenantId: user.tenantId,
+          };
         } catch (error) {
           if (error instanceof ZodError) {
             return null;
@@ -46,5 +84,19 @@ export const { auth, handlers, signIn } = NextAuth({
   ],
   pages: {
     signIn: "/login",
+    newUser: "/signup",
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.tenantId = user.tenantId;
+      }
+
+      return token;
+    },
+    async session({ session, token }) {
+      session.tenantId = token.tenantId;
+      return session;
+    },
   },
 });

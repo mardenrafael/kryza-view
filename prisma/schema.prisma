@@ -1,0 +1,173 @@
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../src/app/generated/prisma"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        String     @id @default(uuid()) @map("tnt_id")
+  name      String     @map("tnt_name")
+  slug      String     @unique @map("tnt_slug")
+  domain    String?    @unique @map("tnt_domain")
+  createdAt DateTime   @default(now()) @map("tnt_created_at")
+  updatedAt DateTime   @default(now()) @updatedAt @map("tnt_updated_at")
+  users     User[]
+  order     Order[]
+  property  Property[]
+
+  @@map("tenants")
+}
+
+model User {
+  id        String   @id @default(uuid()) @map("usr_id")
+  name      String   @map("usr_name")
+  email     String   @map("usr_email")
+  password  String   @map("usr_password")
+  createdAt DateTime @default(now()) @map("usr_created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("usr_updated_at")
+
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  tenantId String @map("tnt_id")
+
+  userType   UserType @relation(fields: [userTypeId], references: [id])
+  userTypeId Int      @default(3)
+
+  order    Order[]
+  property Property[]
+  person   Person?
+
+  @@unique([email, tenantId], name: "user_email_tenant_id_unique")
+  @@map("users")
+}
+
+model UserType {
+  id        Int      @id @default(autoincrement()) @map("uty_id")
+  name      String   @unique @map("uty_name")
+  createdAt DateTime @default(now()) @map("uty_created_at")
+  updatedAt DateTime @updatedAt @map("uty_updated_at")
+
+  users User[]
+
+  @@map("usertypes")
+}
+
+model PropertyType {
+  id        Int      @id @default(autoincrement()) @map("pty_id")
+  name      String   @unique @map("pty_name")
+  createdAt DateTime @default(now()) @map("pty_created_at")
+  updatedAt DateTime @updatedAt @map("pty_updated_at")
+
+  properties Property[]
+
+  @@map("propertytypes")
+}
+
+model Property {
+  id                String  @id @default(uuid()) @map("prp_id")
+  description       String  @map("prp_description")
+  addressStreet     String  @map("prp_address_street")
+  addressNumber     String  @map("prp_address_number")
+  addressComplement String? @map("prp_address_complement")
+  addressCity       String  @map("prp_address_city")
+  addressState      String  @map("prp_address_state")
+  addressZipCode    String  @map("prp_address_zip_code")
+  totalArea         Float   @map("prp_total_area")
+  constructionYear  Int?    @map("prp_construction_year")
+  price             Decimal @map("prp_price") @db.Decimal(12, 2)
+
+  createdAt DateTime @default(now()) @map("prp_created_at")
+  updatedAt DateTime @updatedAt @map("prp_updated_at")
+
+  propertyImage PropertyImage[]
+  order         Order?
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @map("usr_id")
+
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  tenantId String @map("tnt_id")
+
+  propertyType   PropertyType @relation(fields: [propertyTypeId], references: [id])
+  propertyTypeId Int
+
+  @@map("properties")
+}
+
+model Order {
+  id        String   @id @default(uuid()) @map("ord_id")
+  createdAt DateTime @default(now()) @map("ord_created_at")
+  updatedAt DateTime @updatedAt @map("ord_updated_at")
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @map("usr_id")
+
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  tenantId String @map("tnt_id")
+
+  status   Situation @relation(fields: [statusId], references: [id])
+  statusId Int       @map("sts_id")
+
+  property   Property @relation(fields: [propertyId], references: [id])
+  propertyId String   @unique @map("prp_id")
+
+  @@map("orders")
+}
+
+model PropertyImage {
+  id        String   @id @default(uuid()) @map("pri_id")
+  createdAt DateTime @default(now()) @map("pri_created_at")
+  updatedAt DateTime @updatedAt @map("pri_updated_at")
+
+  property   Property @relation(fields: [propertyId], references: [id])
+  propertyId String   @map("prp_id")
+
+  image   Image  @relation(fields: [imageId], references: [id])
+  imageId String @map("img_id")
+
+  @@map("propertyimages")
+}
+
+model Situation {
+  id        Int      @id @default(autoincrement()) @map("sts_id")
+  name      String   @unique @map("sts_name")
+  createdAt DateTime @default(now()) @map("sts_created_at")
+
+  orders Order[]
+
+  @@map("situations")
+}
+
+model Image {
+  id          String   @id @default(uuid()) @map("img_id")
+  url         String   @map("img_url")
+  description String?  @map("img_description")
+  createdAt   DateTime @default(now()) @map("img_created_at")
+  updatedAt   DateTime @updatedAt @map("img_updated_at")
+
+  propertyImage PropertyImage[]
+
+  @@map("images")
+}
+
+model Person {
+  id          String   @id @default(uuid()) @map("per_id")
+  firstName   String   @map("per_firstname")
+  lastName    String   @map("per_lastname")
+  phone       String   @map("per_phone")
+  birthDate   DateTime @map("per_birthdate")
+  cpf         String   @unique @map("per_cpf")
+  rg          String   @unique @map("per_rg")
+  nationality String   @map("per_nationality")
+  createdAt   DateTime @default(now()) @map("per_created_at")
+  updatedAt   DateTime @updatedAt @map("per_updated_at")
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
+
+  @@map("persons")
+}

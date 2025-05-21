@@ -1,13 +1,13 @@
 "use client";
 
 import { EmailField } from "@/components/fields/email-field";
-import { PasswordField } from "@/components/fields/password-field";
-import { Button } from "@/components/ui/button";
+import { PasswordField } from "@/components/fields";
 import { Form } from "@/components/ui/form";
 import { useSignInForm } from "../hooks/use-signin-form";
+import { Button } from "@/components/button";
 
 export function SignInForm() {
-  const { form, onSubmit, control } = useSignInForm();
+  const { form, onSubmit, control, isLoading } = useSignInForm();
 
   return (
     <Form {...form}>
@@ -19,9 +19,7 @@ export function SignInForm() {
           <PasswordField control={control} />
         </div>
         <div>
-          <Button type="submit" className="w-full">
-            Entrar
-          </Button>
+          <Button label="Entrar" isLoading={isLoading} />
         </div>
       </form>
     </Form>
