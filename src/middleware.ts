@@ -33,12 +33,17 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  console.log("Private route accessed.");
   const token = await getToken({ req, secret: process.env.AUTH_SECRET });
-  console.log("Token presence:", token);
+
+  console.log("Token", token);
 
   if (!token) {
+    console.log("No token found, redirecting to login page.");
     return NextResponse.redirect(loginUrl);
   }
+
+  console.log("Token.tenantId", token.tenantId);
 
   if (!token.tenantId) {
     console.log("No tenant found");
@@ -50,6 +55,6 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|error|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+    "/((?!api/auth|api/tenant|error|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
   ],
 };

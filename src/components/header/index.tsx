@@ -3,22 +3,32 @@
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
-import { getSubdomain } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTenant } from "@/providers/tenant-provider";
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { branding } = useTenant();
 
   return (
     <header className="w-full border-b border-border bg-background">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="text-2xl font-bold text-primary">
-          {siteConfig.name}
+        <Link
+          prefetch={false}
+          href="/"
+          className="flex items-center gap-2"
+        >
+          {branding?.logoUrl ? (
+            <img src={branding.logoUrl} alt="Logo" className="h-8 w-auto max-w-[120px] object-contain" />
+          ) : null}
+          <span className="text-2xl font-bold text-primary">
+            {branding?.companyName || siteConfig.name}
+          </span>
         </Link>
         <div className="flex items-center gap-4">
           <div className="hidden md:flex items-center gap-4">
@@ -76,6 +86,7 @@ export function Header() {
 function HeaderActions() {
   const { data: session } = useSession();
   const router = useRouter();
+  const path = usePathname();
 
   const handleLogout = async () => {
     const host = window.location.host;
@@ -85,12 +96,18 @@ function HeaderActions() {
 
     const redirectUrl = `${protocol}://${host}`;
 
-    await signOut({
-      redirect: false,
-    });
+    try {
+      await signOut({
+        redirect: false,
+      });
 
-    router.push(redirectUrl);
+      router.push(redirectUrl);
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
+
+  const isRootPath = path === "/";
 
   return (
     <>
@@ -108,14 +125,23 @@ function HeaderActions() {
           </Link>
         </>
       ) : (
-        <Button
-          variant="outline"
-          size="sm"
-          className="cursor-pointer"
-          onClick={handleLogout}
-        >
-          Logout
-        </Button>
+        <>
+          {isRootPath && (
+            <Link href="/dashboard">
+              <Button size="sm" className="cursor-pointer">
+                Dashboard
+              </Button>
+            </Link>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="cursor-pointer"
+            onClick={handleLogout}
+          >
+            Logout
+          </Button>
+        </>
       )}
       <ThemeToggle />
     </>

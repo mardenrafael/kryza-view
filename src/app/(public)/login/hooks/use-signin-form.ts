@@ -26,7 +26,7 @@ export function useSignInForm() {
     toast.success("Login realizado com sucesso!");
 
     const callbackUrl = searchParams.get("callbackUrl");
-    router.push(callbackUrl || "/dashboard");
+    router.push(callbackUrl || "/admin/dashboard");
   }
 
   return {

@@ -13,7 +13,7 @@ export const PropertyType = [
   { id: PropertyTypeEnum.APARTAMENTO, name: "Apartamento" },
   { id: PropertyTypeEnum.TERRENO, name: "Terreno" },
   { id: PropertyTypeEnum.COBERTURA, name: "Cobertura" },
-  { id: PropertyTypeEnum.COMERCIAL, name: "ComerciaL" },
+  { id: PropertyTypeEnum.COMERCIAL, name: "Comercial" },
   { id: PropertyTypeEnum.GALPAO, name: "Galpao" },
   { id: PropertyTypeEnum.OUTRO, name: "Outro" },
 ];

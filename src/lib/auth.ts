@@ -8,17 +8,17 @@ import { getSubdomain } from "./utils";
 
 declare module "next-auth" {
   interface Session {
-    tenantId: string;
+    tenantId: string | null;
   }
 
   interface User {
-    tenantId: string;
+    tenantId: string | null;
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
-    tenantId: string;
+    tenantId: string | null;
   }
 }
 
@@ -61,6 +61,8 @@ export const { auth, handlers, signIn } = NextAuth({
               tenantId: tenant.id,
             },
           });
+
+          console.log(tenant.id);
 
           if (!user) return null;
 

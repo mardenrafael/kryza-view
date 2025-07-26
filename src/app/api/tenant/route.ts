@@ -1,10 +1,18 @@
-import PrismaInstance from "@/lib/prisma";
+import { getSubdomain } from "@/lib/utils";
+import {
+  getIsfirstAcessByTenantId,
+  getTenantIdBySubDomain,
+} from "@/service/tenant-service";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const subdomain = searchParams.get("subdomain");
+    let subdomain = searchParams.get("subdomain");
+    if (!subdomain) {
+      const hostname = req.headers.get("host");
+      subdomain = getSubdomain(hostname);
+    }
 
     if (!subdomain) {
       return NextResponse.json(
@@ -12,21 +20,19 @@ export async function GET(req: NextRequest) {
         { status: 400 }
       );
     }
-    const tenant = await PrismaInstance.tenant.findUnique({
-      where: { slug: subdomain },
-      select: {
-        id: true,
-      },
-    });
 
-    if (!tenant) {
+    const tenantId = await getTenantIdBySubDomain(subdomain);
+
+    if (!tenantId) {
       return NextResponse.json(
         { error: "Tenant não encontrado" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ tenant });
+    const isFirstAcess = await getIsfirstAcessByTenantId(tenantId);
+
+    return NextResponse.json({ id: tenantId, isFirstAcess });
   } catch (error) {
     console.error("Erro na API de Tenant:", error);
     return NextResponse.json(

@@ -77,7 +77,7 @@ export function Sidebar({ groups }: SidebarProps) {
       initial={false}
       animate={{ width: sidebarOpen ? 256 : 96 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="min-w-0 h-screen bg-background shadow-md border-r border-border flex flex-col p-4 overflow-hidden relative"
+      className="min-w-0 min-h-screen bg-background shadow-md border-r border-border flex flex-col p-4 overflow-hidden relative"
     >
       <Button
         onClick={() => setSidebarOpen((open) => !open)}

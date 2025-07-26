@@ -1,43 +1,41 @@
-import { Header } from "@/components/header";
-import { LinkGroup, Sidebar } from "@/components/sidebar";
-import { BaggageClaimIcon, LayoutDashboardIcon, PlusIcon } from "lucide-react";
-import { PropsWithChildren } from "react";
+"use client";
 
-export const metadata = {
-  title: "Dashboard",
-};
+import { useTenantOwner } from "@/hooks/use-tenant-owner";
+import { usePathname, useRouter } from "next/navigation";
+import { PropsWithChildren, useEffect } from "react";
 
 export default function PrivateLayout({ children }: PropsWithChildren) {
-  const groups: LinkGroup[] = [
-    {
-      links: [
-        {
-          href: "/dashboard",
-          label: "Dashboard",
-          icon: <LayoutDashboardIcon />,
-        },
-      ],
-    },
-    {
-      groupName: "Pedidos",
-      links: [
-        { href: "/pedido", label: "Pedidos", icon: <BaggageClaimIcon /> },
-        {
-          href: "/pedido/novo",
-          label: "Novo Pedido",
-          icon: <PlusIcon />,
-        },
-      ],
-    },
-  ];
+  const { isOwner, loading } = useTenantOwner();
+  const router = useRouter();
+  const pathname = usePathname();
 
-  return (
-    <>
-      <Header />
-      <div className="min-h-screen bg-background flex">
-        <Sidebar groups={groups} />
-        <main className="flex-1 p-6">{children}</main>
+  useEffect(() => {
+    if (!loading) {
+      if (isOwner && pathname === "/admin") {
+        // Se é proprietário, redireciona para área administrativa
+        console.log("[PrivateLayout] isOwner", isOwner);
+        router.push("/admin/dashboard");
+      } else if (!isOwner && pathname === "/app") {
+        // Se é usuário final, redireciona para área de usuários
+        console.log("[PrivateLayout] isOwner", isOwner);
+        router.push("/app");
+      }
+    }
+  }, [isOwner, loading, router]);
+
+  console.log("[PrivateLayout] isOwner 2", isOwner);
+  console.log("[PrivateLayout] loading 2", loading);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Redirecionando...</p>
+        </div>
       </div>
-    </>
-  );
+    );
+  }
+
+  return children;
 }

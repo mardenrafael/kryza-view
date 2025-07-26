@@ -10,15 +10,24 @@ datasource db {
 }
 
 model Tenant {
-  id        String     @id @default(uuid()) @map("tnt_id")
-  name      String     @map("tnt_name")
-  slug      String     @unique @map("tnt_slug")
-  domain    String?    @unique @map("tnt_domain")
-  createdAt DateTime   @default(now()) @map("tnt_created_at")
-  updatedAt DateTime   @default(now()) @updatedAt @map("tnt_updated_at")
-  users     User[]
-  order     Order[]
-  property  Property[]
+  id          String   @id @default(uuid()) @map("tnt_id")
+  name        String   @map("tnt_name")
+  slug        String   @unique @map("tnt_slug")
+  domain      String?  @unique @map("tnt_domain")
+  createdAt   DateTime @default(now()) @map("tnt_created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("tnt_updated_at")
+  firstAccess Int      @default(0) @map("tnt_first_access")
+
+  status   Situation @relation(fields: [statusId], references: [id])
+  statusId Int       @default(2) @map("sts_id")
+
+  userOwnerId String @unique @map("usr_owner_id")
+  userOwner   User   @relation(name: "user_owner", fields: [userOwnerId], references: [id])
+
+  users    User[]
+  order    Order[]
+  property Property[]
+  branding TenantBranding?
 
   @@map("tenants")
 }
@@ -31,15 +40,16 @@ model User {
   createdAt DateTime @default(now()) @map("usr_created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("usr_updated_at")
 
-  tenant   Tenant @relation(fields: [tenantId], references: [id])
-  tenantId String @map("tnt_id")
+  tenant   Tenant? @relation(fields: [tenantId], references: [id])
+  tenantId String? @map("tnt_id")
 
   userType   UserType @relation(fields: [userTypeId], references: [id])
   userTypeId Int      @default(3)
 
-  order    Order[]
-  property Property[]
-  person   Person?
+  order       Order[]
+  property    Property[]
+  person      Person?
+  tenantOwned Tenant[]   @relation(name: "user_owner")
 
   @@unique([email, tenantId], name: "user_email_tenant_id_unique")
   @@map("users")
@@ -68,17 +78,18 @@ model PropertyType {
 }
 
 model Property {
-  id                String  @id @default(uuid()) @map("prp_id")
-  description       String  @map("prp_description")
-  addressStreet     String  @map("prp_address_street")
-  addressNumber     String  @map("prp_address_number")
-  addressComplement String? @map("prp_address_complement")
-  addressCity       String  @map("prp_address_city")
-  addressState      String  @map("prp_address_state")
-  addressZipCode    String  @map("prp_address_zip_code")
-  totalArea         Float   @map("prp_total_area")
-  constructionYear  Int?    @map("prp_construction_year")
-  price             Decimal @map("prp_price") @db.Decimal(12, 2)
+  id                  String  @id @default(uuid()) @map("prp_id")
+  description         String  @map("prp_description")
+  addressStreet       String  @map("prp_address_street")
+  addressNumber       String  @map("prp_address_number")
+  addressComplement   String? @map("prp_address_complement")
+  addressCity         String  @map("prp_address_city")
+  addressState        String  @map("prp_address_state")
+  addressZipCode      String  @map("prp_address_zip_code")
+  addressNeighborhood String  @map("prp_address_neighborhood")
+  totalArea           Float   @map("prp_total_area")
+  constructionYear    Int?    @map("prp_construction_year")
+  price               Decimal @map("prp_price") @db.Decimal(12, 2)
 
   createdAt DateTime @default(now()) @map("prp_created_at")
   updatedAt DateTime @updatedAt @map("prp_updated_at")
@@ -93,15 +104,17 @@ model Property {
   tenantId String @map("tnt_id")
 
   propertyType   PropertyType @relation(fields: [propertyTypeId], references: [id])
-  propertyTypeId Int
+  propertyTypeId Int          @map("pty_id")
 
   @@map("properties")
 }
 
 model Order {
   id        String   @id @default(uuid()) @map("ord_id")
+  name      String   @default("") @map("ord_name")
   createdAt DateTime @default(now()) @map("ord_created_at")
   updatedAt DateTime @updatedAt @map("ord_updated_at")
+  code      Int      @unique @map("ord_code")
 
   user   User   @relation(fields: [userId], references: [id])
   userId String @map("usr_id")
@@ -138,6 +151,7 @@ model Situation {
   createdAt DateTime @default(now()) @map("sts_created_at")
 
   orders Order[]
+  Tenant Tenant[]
 
   @@map("situations")
 }
@@ -171,3 +185,26 @@ model Person {
 
   @@map("persons")
 }
+
+model TenantBranding {
+  id                String   @id @default(uuid()) @map("tbr_id")
+  primaryColor      String   @default("#000000") @map("tbr_primary_color")
+  secondaryColor    String   @default("#ffffff") @map("tbr_secondary_color")
+  accentColor       String   @default("#3b82f6") @map("tbr_accent_color")
+  logoUrl           String?  @map("tbr_logo_url")
+  faviconUrl        String?  @map("tbr_favicon_url")
+  companyName       String   @map("tbr_company_name")
+  companySlogan     String?  @map("tbr_company_slogan")
+  contactEmail      String?  @map("tbr_contact_email")
+  contactPhone      String?  @map("tbr_contact_phone")
+  address           String?  @map("tbr_address")
+  socialMedia       Json?    @map("tbr_social_media")
+  createdAt         DateTime @default(now()) @map("tbr_created_at")
+  updatedAt         DateTime @default(now()) @updatedAt @map("tbr_updated_at")
+
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenantId String @unique @map("tnt_id")
+
+  @@map("tenant_branding")
+}
+
