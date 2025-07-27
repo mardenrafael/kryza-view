@@ -187,24 +187,23 @@ model Person {
 }
 
 model TenantBranding {
-  id                String   @id @default(uuid()) @map("tbr_id")
-  primaryColor      String   @default("#000000") @map("tbr_primary_color")
-  secondaryColor    String   @default("#ffffff") @map("tbr_secondary_color")
-  accentColor       String   @default("#3b82f6") @map("tbr_accent_color")
-  logoUrl           String?  @map("tbr_logo_url")
-  faviconUrl        String?  @map("tbr_favicon_url")
-  companyName       String   @map("tbr_company_name")
-  companySlogan     String?  @map("tbr_company_slogan")
-  contactEmail      String?  @map("tbr_contact_email")
-  contactPhone      String?  @map("tbr_contact_phone")
-  address           String?  @map("tbr_address")
-  socialMedia       Json?    @map("tbr_social_media")
-  createdAt         DateTime @default(now()) @map("tbr_created_at")
-  updatedAt         DateTime @default(now()) @updatedAt @map("tbr_updated_at")
+  id             String   @id @default(uuid()) @map("tbr_id")
+  primaryColor   String   @default("#000000") @map("tbr_primary_color")
+  secondaryColor String   @default("#ffffff") @map("tbr_secondary_color")
+  accentColor    String   @default("#3b82f6") @map("tbr_accent_color")
+  logoUrl        String?  @map("tbr_logo_url")
+  faviconUrl     String?  @map("tbr_favicon_url")
+  companyName    String   @map("tbr_company_name")
+  companySlogan  String?  @map("tbr_company_slogan")
+  contactEmail   String?  @map("tbr_contact_email")
+  contactPhone   String?  @map("tbr_contact_phone")
+  address        String?  @map("tbr_address")
+  socialMedia    Json?    @map("tbr_social_media")
+  createdAt      DateTime @default(now()) @map("tbr_created_at")
+  updatedAt      DateTime @default(now()) @updatedAt @map("tbr_updated_at")
 
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   tenantId String @unique @map("tnt_id")
 
   @@map("tenant_branding")
 }
-

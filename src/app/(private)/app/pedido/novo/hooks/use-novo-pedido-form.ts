@@ -7,18 +7,19 @@ export function useNovoPedidoForm() {
   const router = useRouter();
   const form = useForm();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async function onSubmit(data: any, images?: any[]) {
     console.log("🚀 Hook onSubmit chamado com dados:", data);
     console.log("🖼️ Imagens no hook:", images);
-    
+
     // Combina os dados do formulário com as imagens
     const dataWithImages = {
       ...data,
       images: images || [],
     };
-    
+
     console.log("📦 Dados finais com imagens:", dataWithImages);
-    
+
     try {
       console.log("📡 Enviando requisição para /api/pedido");
       const res = await api.post("/api/pedido", dataWithImages);

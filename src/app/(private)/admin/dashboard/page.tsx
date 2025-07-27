@@ -1,8 +1,19 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { api } from "@/lib/api";
-import { BaggageClaimIcon, ClockIcon, TrendingUpIcon, UsersIcon } from "lucide-react";
+import {
+  BaggageClaimIcon,
+  ClockIcon,
+  TrendingUpIcon,
+  UsersIcon,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -25,14 +36,22 @@ export default function AdminDashboardPage() {
       try {
         const response = await api.get("/api/admin/pedidos");
         const orders = response.data;
-        
+
         const stats: DashboardStats = {
           totalOrders: orders.length,
-          pendingOrders: orders.filter((order: any) => order.status.name === "PENDING").length,
-          completedOrders: orders.filter((order: any) => order.status.name === "COMPLETED").length,
-          totalUsers: new Set(orders.map((order: any) => order.user.id)).size,
+          pendingOrders: orders.filter(
+            (order: { status: { name: string } }) =>
+              order.status.name === "PENDING"
+          ).length,
+          completedOrders: orders.filter(
+            (order: { status: { name: string } }) =>
+              order.status.name === "COMPLETED"
+          ).length,
+          totalUsers: new Set(
+            orders.map((order: { user: { id: string } }) => order.user.id)
+          ).size,
         };
-        
+
         setStats(stats);
       } catch (error) {
         console.error("Erro ao carregar estatísticas:", error);
@@ -61,7 +80,8 @@ export default function AdminDashboardPage() {
         <CardHeader>
           <CardTitle>Olá, {nome}!</CardTitle>
           <CardDescription>
-            Bem-vindo ao painel administrativo. Aqui você pode gerenciar todos os pedidos e acompanhar as estatísticas do sistema.
+            Bem-vindo ao painel administrativo. Aqui você pode gerenciar todos
+            os pedidos e acompanhar as estatísticas do sistema.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -70,7 +90,9 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total de Pedidos</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total de Pedidos
+              </CardTitle>
               <BaggageClaimIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -83,11 +105,15 @@ export default function AdminDashboardPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pedidos Pendentes</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Pedidos Pendentes
+              </CardTitle>
               <ClockIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">{stats.pendingOrders}</div>
+              <div className="text-2xl font-bold text-yellow-600">
+                {stats.pendingOrders}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Aguardando análise
               </p>
@@ -96,11 +122,15 @@ export default function AdminDashboardPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pedidos Concluídos</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Pedidos Concluídos
+              </CardTitle>
               <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{stats.completedOrders}</div>
+              <div className="text-2xl font-bold text-green-600">
+                {stats.completedOrders}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Análises finalizadas
               </p>
@@ -109,7 +139,9 @@ export default function AdminDashboardPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Usuários Ativos</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Usuários Ativos
+              </CardTitle>
               <UsersIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -131,8 +163,8 @@ export default function AdminDashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link 
-              href="/admin/pedidos" 
+            <Link
+              href="/admin/pedidos"
               className="p-4 border rounded-lg hover:bg-muted transition-colors"
             >
               <div className="flex items-center space-x-3">
@@ -150,4 +182,4 @@ export default function AdminDashboardPage() {
       </Card>
     </div>
   );
-} 
+}

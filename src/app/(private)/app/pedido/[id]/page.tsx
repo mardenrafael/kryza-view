@@ -13,12 +13,12 @@ import {
 } from "@/lib/order-utils";
 import {
   ArrowLeft,
-  MapPin,
+  Building,
   Calendar,
   DollarSign,
   Home,
+  MapPin,
   Ruler,
-  Building,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -71,6 +71,7 @@ export default function PedidoDetalhesPage() {
     if (params.id) {
       fetchOrderDetails(params.id as string);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   const fetchOrderDetails = async (orderId: string) => {

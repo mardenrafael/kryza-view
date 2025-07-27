@@ -16,7 +16,6 @@ import { api } from "@/lib/api";
 import {
   formatCurrency,
   formatDate,
-  statusTranslations,
   translateOrderStatus,
 } from "@/lib/order-utils";
 import {
@@ -86,6 +85,7 @@ export default function AdminPedidoDetalhesPage() {
     if (params.id) {
       fetchOrderDetails(params.id as string);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   const fetchOrderDetails = async (orderId: string) => {
@@ -93,6 +93,7 @@ export default function AdminPedidoDetalhesPage() {
     try {
       const response = await api.get(`/api/admin/${orderId}`);
       setOrder(response.data);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       router.push("/admin/pedidos");
     }
@@ -113,18 +114,10 @@ export default function AdminPedidoDetalhesPage() {
         prev ? { ...prev, status: response.data.status } : null
       );
       toast.success("Situação do pedido atualizada com sucesso!");
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {}
     setUpdatingStatus(false);
   };
-
-  // const getStatusOptions = () => [
-  //   { value: "1", label: "Pendente" },
-  //   { value: "2", label: "Aprovado" },
-  //   { value: "3", label: "Rejeitado" },
-  //   { value: "4", label: "Cancelado" },
-  //   { value: "5", label: "Em Andamento" },
-  //   { value: "6", label: "Concluído" },
-  // ];
 
   if (loading) {
     return (

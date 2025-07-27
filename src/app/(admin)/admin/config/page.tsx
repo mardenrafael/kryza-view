@@ -1,16 +1,23 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { TenantBrandingData } from "@/service/tenant-admin-service";
 import { api } from "@/lib/api";
+import { useTenant } from "@/providers/tenant-provider";
+import { TenantBrandingData } from "@/service/tenant-admin-service";
+import { isAxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { useTenant } from "@/providers/tenant-provider";
 
 export default function ConfigPage() {
   const { data: session, status } = useSession();
@@ -20,9 +27,9 @@ export default function ConfigPage() {
   const [isFirstAccess, setIsFirstAccess] = useState(false);
   const [formData, setFormData] = useState<TenantBrandingData>({
     tenantId: "",
-    primaryColor: "#d7263d", // Vermelho padrão do sistema
-    secondaryColor: "#f9fafb", // Cinza claro padrão
-    accentColor: "#1f2937", // Cinza escuro padrão
+    primaryColor: "#d7263d",
+    secondaryColor: "#f9fafb",
+    accentColor: "#1f2937",
     companyName: "",
     companySlogan: "",
     contactEmail: "",
@@ -35,18 +42,25 @@ export default function ConfigPage() {
   const { setBranding } = useTenant();
 
   useEffect(() => {
-    console.log("useEffect disparado", { session, status, tenantId: session?.tenantId });
+    console.log("useEffect disparado", {
+      session,
+      status,
+      tenantId: session?.tenantId,
+    });
     if (session?.tenantId) {
       loadBrandingData();
       checkFirstAccess();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status]);
 
   const checkFirstAccess = async () => {
     try {
       if (session?.tenantId) {
         console.log("Verificando firstAccess para", session.tenantId);
-        const response = await api.get(`/api/tenant/first-access?tenantId=${session.tenantId}`);
+        const response = await api.get(
+          `/api/tenant/first-access?tenantId=${session.tenantId}`
+        );
         const { firstAccess } = response.data;
         setIsFirstAccess(firstAccess);
         console.log("Resultado firstAccess:", firstAccess);
@@ -61,10 +75,12 @@ export default function ConfigPage() {
       setLoading(true);
       console.log("Iniciando loadBrandingData", session?.tenantId);
       if (session?.tenantId) {
-        const response = await api.get(`/api/tenant/branding?tenantId=${session.tenantId}`);
+        const response = await api.get(
+          `/api/tenant/branding?tenantId=${session.tenantId}`
+        );
         const branding = response.data;
         console.log("Branding retornado:", branding);
-        
+
         if (branding) {
           setFormData({
             ...branding,
@@ -88,11 +104,12 @@ export default function ConfigPage() {
           });
         }
       }
-    } catch (error: any) {
-      if (error.response?.status !== 404) {
-        console.error("Erro ao carregar configuração de branding:", error);
+    } catch (error) {
+      if (isAxiosError(error)) {
+        if (error.response?.status !== 404) {
+          console.error("Erro ao carregar configuração de branding:", error);
+        }
       }
-      // Se for 404, mantém a configuração padrão
     } finally {
       setLoading(false);
       console.log("Finalizou loading");
@@ -109,7 +126,9 @@ export default function ConfigPage() {
           tenantId: session.tenantId as string,
         });
         // Atualiza o contexto imediatamente após salvar
-        const { data: newBranding } = await api.get(`/api/tenant/branding?tenantId=${session.tenantId}`);
+        const { data: newBranding } = await api.get(
+          `/api/tenant/branding?tenantId=${session.tenantId}`
+        );
         setBranding(newBranding);
         // Se for primeiro acesso, marcar como concluído e redirecionar
         if (isFirstAccess) {
@@ -126,15 +145,18 @@ export default function ConfigPage() {
     }
   };
 
-  const handleInputChange = (field: keyof TenantBrandingData, value: string) => {
-    setFormData(prev => ({
+  const handleInputChange = (
+    field: keyof TenantBrandingData,
+    value: string
+  ) => {
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
   const handleSocialMediaChange = (platform: string, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       socialMedia: {
         ...prev.socialMedia,
@@ -155,7 +177,7 @@ export default function ConfigPage() {
     <div className="space-y-6">
       {isFirstAccess && (
         <Card className="border-secondary bg-card">
-          <CardContent >
+          <CardContent>
             <div className="flex items-center justify-center space-x-2">
               <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
               <p className="text-card-foreground font-medium">
@@ -171,10 +193,9 @@ export default function ConfigPage() {
           {isFirstAccess ? "Configuração Inicial" : "Configurações do Sistema"}
         </h1>
         <p className="text-muted-foreground">
-          {isFirstAccess 
+          {isFirstAccess
             ? "Personalize as cores e informações da sua empresa"
-            : "Gerencie as configurações de branding do seu sistema"
-          }
+            : "Gerencie as configurações de branding do seu sistema"}
         </p>
       </div>
 
@@ -194,7 +215,9 @@ export default function ConfigPage() {
                 <Input
                   id="companyName"
                   value={formData.companyName}
-                  onChange={(e) => handleInputChange("companyName", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("companyName", e.target.value)
+                  }
                   placeholder="Nome da sua empresa"
                 />
               </div>
@@ -203,12 +226,14 @@ export default function ConfigPage() {
                 <Input
                   id="companySlogan"
                   value={formData.companySlogan || ""}
-                  onChange={(e) => handleInputChange("companySlogan", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("companySlogan", e.target.value)
+                  }
                   placeholder="Slogan da empresa"
                 />
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="contactEmail">Email de Contato</Label>
@@ -216,7 +241,9 @@ export default function ConfigPage() {
                   id="contactEmail"
                   type="email"
                   value={formData.contactEmail || ""}
-                  onChange={(e) => handleInputChange("contactEmail", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("contactEmail", e.target.value)
+                  }
                   placeholder="contato@empresa.com"
                 />
               </div>
@@ -225,7 +252,9 @@ export default function ConfigPage() {
                 <Input
                   id="contactPhone"
                   value={formData.contactPhone || ""}
-                  onChange={(e) => handleInputChange("contactPhone", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("contactPhone", e.target.value)
+                  }
                   placeholder="(11) 99999-9999"
                 />
               </div>
@@ -300,7 +329,9 @@ export default function ConfigPage() {
                 <Input
                   id="faviconUrl"
                   value={formData.faviconUrl || ""}
-                  onChange={(e) => handleInputChange("faviconUrl", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("faviconUrl", e.target.value)
+                  }
                   placeholder="https://exemplo.com/favicon.ico"
                 />
               </div>
@@ -323,7 +354,9 @@ export default function ConfigPage() {
                 <Input
                   id="facebook"
                   value={formData.socialMedia?.facebook || ""}
-                  onChange={(e) => handleSocialMediaChange("facebook", e.target.value)}
+                  onChange={(e) =>
+                    handleSocialMediaChange("facebook", e.target.value)
+                  }
                   placeholder="https://facebook.com/empresa"
                 />
               </div>
@@ -332,7 +365,9 @@ export default function ConfigPage() {
                 <Input
                   id="instagram"
                   value={formData.socialMedia?.instagram || ""}
-                  onChange={(e) => handleSocialMediaChange("instagram", e.target.value)}
+                  onChange={(e) =>
+                    handleSocialMediaChange("instagram", e.target.value)
+                  }
                   placeholder="https://instagram.com/empresa"
                 />
               </div>
@@ -341,7 +376,9 @@ export default function ConfigPage() {
                 <Input
                   id="linkedin"
                   value={formData.socialMedia?.linkedin || ""}
-                  onChange={(e) => handleSocialMediaChange("linkedin", e.target.value)}
+                  onChange={(e) =>
+                    handleSocialMediaChange("linkedin", e.target.value)
+                  }
                   placeholder="https://linkedin.com/company/empresa"
                 />
               </div>
@@ -350,7 +387,9 @@ export default function ConfigPage() {
                 <Input
                   id="twitter"
                   value={formData.socialMedia?.twitter || ""}
-                  onChange={(e) => handleSocialMediaChange("twitter", e.target.value)}
+                  onChange={(e) =>
+                    handleSocialMediaChange("twitter", e.target.value)
+                  }
                   placeholder="https://twitter.com/empresa"
                 />
               </div>
@@ -365,12 +404,16 @@ export default function ConfigPage() {
             Cancelar
           </Button>
         )}
-        <Button 
-          onClick={handleSave} 
+        <Button
+          onClick={handleSave}
           disabled={saving || !formData.companyName}
           className="min-w-[120px]"
         >
-          {saving ? "Salvando..." : isFirstAccess ? "Começar" : "Salvar Configuração"}
+          {saving
+            ? "Salvando..."
+            : isFirstAccess
+            ? "Começar"
+            : "Salvar Configuração"}
         </Button>
       </div>
     </div>

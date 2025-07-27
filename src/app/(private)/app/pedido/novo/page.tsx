@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import { Button } from "@/components/button";
@@ -15,37 +16,47 @@ import { useNovoPedidoForm } from "./hooks/use-novo-pedido-form";
 
 export default function PedidoNovoPage() {
   const { control, form, isLoading, onSubmit } = useNovoPedidoForm();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [uploadedImages, setUploadedImages] = useState<any[]>([]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmit = async (data: any) => {
     console.log("📝 Dados do formulário:", data);
     console.log("🖼️ Imagens carregadas:", uploadedImages);
-    
+
     // Validação específica para propertyTypeId
     if (!data.propertyTypeId) {
       console.error("❌ propertyTypeId está vazio ou undefined!");
     } else {
       console.log("✅ propertyTypeId tem valor:", data.propertyTypeId);
     }
-    
+
     // Validação para outros campos importantes
     const requiredFields = [
-      'orderName', 'addressStreet', 'addressNeighborhood', 
-      'addressNumber', 'addressCity', 'addressState', 
-      'addressZipCode', 'propertyTypeId', 'totalArea', 'price', 'description'
+      "orderName",
+      "addressStreet",
+      "addressNeighborhood",
+      "addressNumber",
+      "addressCity",
+      "addressState",
+      "addressZipCode",
+      "propertyTypeId",
+      "totalArea",
+      "price",
+      "description",
     ];
-    
-    requiredFields.forEach(field => {
+
+    requiredFields.forEach((field) => {
       if (!data[field]) {
         console.error(`❌ Campo obrigatório '${field}' está vazio!`);
       } else {
         console.log(`✅ Campo '${field}' tem valor:`, data[field]);
       }
     });
-    
+
     console.log("📦 Dados finais enviados para API:", data);
     console.log("📊 Quantidade de imagens:", uploadedImages.length);
-    
+
     // Chama o onSubmit original passando as imagens como segundo parâmetro
     await onSubmit(data, uploadedImages);
   };
@@ -54,13 +65,18 @@ export default function PedidoNovoPage() {
     <div className="max-w-2xl mx-auto py-10 px-4">
       <section className="mb-4">
         <h1 className="text-2xl font-bold">Novo Pedido de Análise</h1>
-        <p>Preencha os detalhes do imóvel e clique em "Salvar" para criar o pedido.</p>
+        <p>
+          Preencha os detalhes do imóvel e clique em "Salvar" para criar o
+          pedido.
+        </p>
       </section>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
           <div className="grid grid-cols-2 gap-4">
             <>
-              <h2 className="text-lg font-bold col-span-2">Informações Gerais</h2>
+              <h2 className="text-lg font-bold col-span-2">
+                Informações Gerais
+              </h2>
               <section className="col-span-2 grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <TextField
@@ -74,7 +90,9 @@ export default function PedidoNovoPage() {
               </section>
             </>
             <>
-              <h2 className="text-lg font-bold col-span-2">Endereço do Imóvel</h2>
+              <h2 className="text-lg font-bold col-span-2">
+                Endereço do Imóvel
+              </h2>
               <section className="col-span-2 grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <TextField
@@ -131,7 +149,9 @@ export default function PedidoNovoPage() {
               </section>
             </>
             <>
-              <h2 className="text-lg font-bold col-span-2">Detalhes do Imóvel</h2>
+              <h2 className="text-lg font-bold col-span-2">
+                Detalhes do Imóvel
+              </h2>
               <section className="col-span-2 grid grid-cols-2 gap-4">
                 <Select.Root
                   label="Tipo do Imóvel"
@@ -142,7 +162,7 @@ export default function PedidoNovoPage() {
                 >
                   <Select.Items>
                     {PropertyType.map(({ id, name }) => (
-                      <Select.Item key={id} value={""+id} label={name} />
+                      <Select.Item key={id} value={"" + id} label={name} />
                     ))}
                   </Select.Items>
                 </Select.Root>
@@ -178,7 +198,9 @@ export default function PedidoNovoPage() {
               </section>
             </>
             <>
-              <h2 className="text-lg font-bold col-span-2">Imagens do Imóvel</h2>
+              <h2 className="text-lg font-bold col-span-2">
+                Imagens do Imóvel
+              </h2>
               <section className="col-span-2">
                 <ImageUpload
                   onImagesUploaded={setUploadedImages}

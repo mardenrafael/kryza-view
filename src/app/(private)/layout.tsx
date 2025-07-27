@@ -21,6 +21,7 @@ export default function PrivateLayout({ children }: PropsWithChildren) {
         router.push("/app");
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOwner, loading, router]);
 
   console.log("[PrivateLayout] isOwner 2", isOwner);

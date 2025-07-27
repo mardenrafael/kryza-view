@@ -4,9 +4,11 @@ WORKDIR /app
 
 COPY package.json ./
 COPY package-lock.json ./
-RUN npm install
 
+RUN npm install
 COPY . .
+RUN npx tsc --outDir dist --skipLibCheck --noEmitOnError false prisma/seed.cts
+
 RUN npm run build
 
 FROM node:22.11.0-alpine AS production
@@ -19,7 +21,14 @@ COPY --from=builder /app/package.json ./
 COPY --from=builder /app/package-lock.json ./
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma/migrations ./prisma/migrations
+COPY --from=builder /app/dist/prisma/seed.cjs ./prisma/seed.js
+COPY --from=builder /app/dist/src ./src/
+COPY --from=builder /app/prisma/schema.prisma ./prisma/schema.prisma
+
+RUN npm install --only=production
+RUN npx prisma generate
+
 
 EXPOSE 3000
 CMD ["npm", "run", "start"]

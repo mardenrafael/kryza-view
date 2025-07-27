@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { Button } from "@/components/button";
@@ -59,15 +60,31 @@ export default function EditarPedidoPage() {
   const router = useRouter();
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [uploadedImages, setUploadedImages] = useState<any[]>([]);
-  const [existingImages, setExistingImages] = useState<any[]>([]);
 
-  const { control, form, isLoading, onSubmit } = useEditarPedidoForm(params.id as string);
+  const [uploadedImages, setUploadedImages] = useState<
+    {
+      url: string;
+      originalName: string;
+      id?: string;
+    }[]
+  >([]);
+  const [existingImages, setExistingImages] = useState<
+    {
+      url: string;
+      originalName: string;
+      id?: string;
+    }[]
+  >([]);
+
+  const { control, form, isLoading, onSubmit } = useEditarPedidoForm(
+    params.id as string
+  );
 
   useEffect(() => {
     if (params.id) {
       fetchOrderDetails(params.id as string);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   const fetchOrderDetails = async (orderId: string) => {
@@ -75,16 +92,18 @@ export default function EditarPedidoPage() {
     try {
       const response = await api.get(`/api/pedido/${orderId}`);
       const orderData = response.data;
-      
+
       // Verifica se o pedido pode ser editado (apenas pendentes)
       if (orderData.status.name !== "PENDING") {
-        toast.error("Este pedido não pode ser editado. Apenas pedidos pendentes podem ser alterados.");
+        toast.error(
+          "Este pedido não pode ser editado. Apenas pedidos pendentes podem ser alterados."
+        );
         router.push(`/app/pedido/${orderId}`);
         return;
       }
 
       setOrder(orderData);
-      
+
       // Preenche o formulário com os dados existentes
       form.reset({
         orderName: orderData.name,
@@ -103,13 +122,14 @@ export default function EditarPedidoPage() {
       });
 
       // Converte imagens existentes para o formato esperado
-      const existingImagesFormatted = orderData.property.propertyImage.map((pi: any) => ({
-        url: pi.image.url,
-        originalName: pi.image.description || "Imagem",
-        id: pi.image.id,
-      }));
+      const existingImagesFormatted = orderData.property.propertyImage.map(
+        (pi: { image: { id: string; url: string; description: string } }) => ({
+          url: pi.image.url,
+          originalName: pi.image.description || "Imagem",
+          id: pi.image.id,
+        })
+      );
       setExistingImages(existingImagesFormatted);
-      
     } catch (error) {
       console.error("Erro ao buscar detalhes do pedido:", error);
       toast.error("Erro ao carregar detalhes do pedido");
@@ -118,16 +138,31 @@ export default function EditarPedidoPage() {
     setLoading(false);
   };
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: {
+    orderName: string;
+    addressStreet: string;
+    addressNeighborhood: string;
+    addressNumber: string;
+    addressComplement?: string;
+    addressCity: string;
+    addressState: string;
+    addressZipCode: string;
+    propertyTypeId: string;
+    totalArea: string;
+    constructionYear?: string;
+    price: string;
+    description: string;
+  }) => {
     // Combina imagens existentes com novas imagens
     const allImages = [...existingImages, ...uploadedImages];
-    
+
     const dataWithImages = {
       ...data,
       images: allImages,
     };
-    
-    await onSubmit(dataWithImages);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await onSubmit(dataWithImages as any);
   };
 
   if (loading) {
@@ -146,7 +181,7 @@ export default function EditarPedidoPage() {
         <div className="text-center py-8">
           <p className="text-muted-foreground">Pedido não encontrado.</p>
           <Link href="/app/pedido">
-            <Button 
+            <Button
               label="Voltar para Meus Pedidos"
               isLoading={false}
               className="mt-4"
@@ -162,7 +197,7 @@ export default function EditarPedidoPage() {
       <section className="mb-4">
         <div className="flex items-center gap-4 mb-4">
           <Link href={`/app/pedido/${order.id}`}>
-            <Button 
+            <Button
               label="Voltar"
               isLoading={false}
               className="flex items-center"
@@ -173,17 +208,24 @@ export default function EditarPedidoPage() {
           <div>
             <h1 className="text-2xl font-bold">Editar Pedido #{order.code}</h1>
             <p className="text-muted-foreground">
-              Altere as informações do pedido. Apenas pedidos pendentes podem ser editados.
+              Altere as informações do pedido. Apenas pedidos pendentes podem
+              ser editados.
             </p>
           </div>
         </div>
       </section>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+        <form
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          onSubmit={form.handleSubmit(handleSubmit as any)}
+          className="space-y-8"
+        >
           <div className="grid grid-cols-2 gap-4">
             <>
-              <h2 className="text-lg font-bold col-span-2">Informações Gerais</h2>
+              <h2 className="text-lg font-bold col-span-2">
+                Informações Gerais
+              </h2>
               <section className="col-span-2 grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <TextField
@@ -197,7 +239,9 @@ export default function EditarPedidoPage() {
               </section>
             </>
             <>
-              <h2 className="text-lg font-bold col-span-2">Endereço do Imóvel</h2>
+              <h2 className="text-lg font-bold col-span-2">
+                Endereço do Imóvel
+              </h2>
               <section className="col-span-2 grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <TextField
@@ -254,7 +298,9 @@ export default function EditarPedidoPage() {
               </section>
             </>
             <>
-              <h2 className="text-lg font-bold col-span-2">Detalhes do Imóvel</h2>
+              <h2 className="text-lg font-bold col-span-2">
+                Detalhes do Imóvel
+              </h2>
               <section className="col-span-2 grid grid-cols-2 gap-4">
                 <Select.Root
                   label="Tipo do Imóvel"
@@ -265,7 +311,7 @@ export default function EditarPedidoPage() {
                 >
                   <Select.Items>
                     {PropertyType.map(({ id, name }) => (
-                      <Select.Item key={id} value={""+id} label={name} />
+                      <Select.Item key={id} value={"" + id} label={name} />
                     ))}
                   </Select.Items>
                 </Select.Root>
@@ -301,11 +347,15 @@ export default function EditarPedidoPage() {
               </section>
             </>
             <>
-              <h2 className="text-lg font-bold col-span-2">Imagens do Imóvel</h2>
+              <h2 className="text-lg font-bold col-span-2">
+                Imagens do Imóvel
+              </h2>
               <section className="col-span-2">
                 {existingImages.length > 0 && (
                   <div className="mb-4">
-                    <p className="text-sm font-medium mb-2">Imagens atuais ({existingImages.length})</p>
+                    <p className="text-sm font-medium mb-2">
+                      Imagens atuais ({existingImages.length})
+                    </p>
                     <div className="grid grid-cols-3 gap-2">
                       {existingImages.map((img, index) => (
                         <div key={index} className="relative">
@@ -317,7 +367,9 @@ export default function EditarPedidoPage() {
                           <button
                             type="button"
                             onClick={() => {
-                              setExistingImages(prev => prev.filter((_, i) => i !== index));
+                              setExistingImages((prev) =>
+                                prev.filter((_, i) => i !== index)
+                              );
                             }}
                             className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
                           >
@@ -344,4 +396,4 @@ export default function EditarPedidoPage() {
       </Form>
     </div>
   );
-} 
+}

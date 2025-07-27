@@ -1,18 +1,35 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { useSession } from "next-auth/react";
 import { api } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { BaggageClaimIcon, ClockIcon, TrendingUpIcon, PlusIcon } from "lucide-react";
+import {
+  BaggageClaimIcon,
+  ClockIcon,
+  TrendingUpIcon,
+  PlusIcon,
+} from "lucide-react";
 import Link from "next/link";
 
 interface UserDashboardStats {
   totalOrders: number;
   pendingOrders: number;
   completedOrders: number;
-  recentOrders: any[];
+  recentOrders: {
+    id: string;
+    name: string;
+    code: string;
+    property: { addressCity: string; addressState: string };
+    status: { name: string };
+  }[];
 }
 
 export default function UserDashboardPage() {
@@ -26,14 +43,20 @@ export default function UserDashboardPage() {
       try {
         const response = await api.get("/api/pedido");
         const orders = response.data;
-        
+
         const stats: UserDashboardStats = {
           totalOrders: orders.length,
-          pendingOrders: orders.filter((order: any) => order.status.name === "PENDING").length,
-          completedOrders: orders.filter((order: any) => order.status.name === "COMPLETED").length,
+          pendingOrders: orders.filter(
+            (order: { status: { name: string } }) =>
+              order.status.name === "PENDING"
+          ).length,
+          completedOrders: orders.filter(
+            (order: { status: { name: string } }) =>
+              order.status.name === "COMPLETED"
+          ).length,
           recentOrders: orders.slice(0, 5), // Últimos 5 pedidos
         };
-        
+
         setStats(stats);
       } catch (error) {
         console.error("Erro ao carregar estatísticas:", error);
@@ -62,7 +85,8 @@ export default function UserDashboardPage() {
         <CardHeader>
           <CardTitle>Olá, {nome}!</CardTitle>
           <CardDescription>
-            Bem-vindo ao seu painel. Aqui você pode acompanhar seus pedidos, criar novos pedidos e acompanhar o status das suas análises.
+            Bem-vindo ao seu painel. Aqui você pode acompanhar seus pedidos,
+            criar novos pedidos e acompanhar o status das suas análises.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -71,7 +95,9 @@ export default function UserDashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total de Pedidos</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total de Pedidos
+              </CardTitle>
               <BaggageClaimIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -84,11 +110,15 @@ export default function UserDashboardPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pedidos Pendentes</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Pedidos Pendentes
+              </CardTitle>
               <ClockIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">{stats.pendingOrders}</div>
+              <div className="text-2xl font-bold text-yellow-600">
+                {stats.pendingOrders}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Aguardando análise
               </p>
@@ -97,11 +127,15 @@ export default function UserDashboardPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pedidos Concluídos</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Pedidos Concluídos
+              </CardTitle>
               <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{stats.completedOrders}</div>
+              <div className="text-2xl font-bold text-green-600">
+                {stats.completedOrders}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Análises finalizadas
               </p>
@@ -119,8 +153,8 @@ export default function UserDashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link 
-              href="/app/pedido/novo" 
+            <Link
+              href="/app/pedido/novo"
               className="p-4 border rounded-lg hover:bg-muted transition-colors"
             >
               <div className="flex items-center space-x-3">
@@ -133,9 +167,9 @@ export default function UserDashboardPage() {
                 </div>
               </div>
             </Link>
-            
-            <Link 
-              href="/app/pedido" 
+
+            <Link
+              href="/app/pedido"
               className="p-4 border rounded-lg hover:bg-muted transition-colors"
             >
               <div className="flex items-center space-x-3">
@@ -156,38 +190,60 @@ export default function UserDashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Pedidos Recentes</CardTitle>
-            <CardDescription>
-              Seus últimos pedidos criados
-            </CardDescription>
+            <CardDescription>Seus últimos pedidos criados</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {stats.recentOrders.map((order: any) => (
-                <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex-1">
-                    <h4 className="font-medium">{order.name || `Pedido #${order.code}`}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {order.property.addressCity}, {order.property.addressState}
-                    </p>
+              {stats.recentOrders.map(
+                (order: {
+                  id: string;
+                  name: string;
+                  code: string;
+                  property: { addressCity: string; addressState: string };
+                  status: { name: string };
+                }) => (
+                  <div
+                    key={order.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
+                    <div className="flex-1">
+                      <h4 className="font-medium">
+                        {order.name || `Pedido #${order.code}`}
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        {order.property.addressCity},{" "}
+                        {order.property.addressState}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge
+                        variant={
+                          order.status.name === "PENDING"
+                            ? "secondary"
+                            : order.status.name === "COMPLETED"
+                            ? "default"
+                            : "outline"
+                        }
+                      >
+                        {order.status.name === "PENDING"
+                          ? "Pendente"
+                          : order.status.name === "COMPLETED"
+                          ? "Concluído"
+                          : order.status.name}
+                      </Badge>
+                      <Link href={`/app/pedido/${order.id}`}>
+                        <span className="text-sm text-primary hover:underline">
+                          Ver detalhes
+                        </span>
+                      </Link>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge variant={
-                      order.status.name === "PENDING" ? "secondary" :
-                      order.status.name === "COMPLETED" ? "default" : "outline"
-                    }>
-                      {order.status.name === "PENDING" ? "Pendente" :
-                       order.status.name === "COMPLETED" ? "Concluído" : order.status.name}
-                    </Badge>
-                    <Link href={`/app/pedido/${order.id}`}>
-                      <span className="text-sm text-primary hover:underline">Ver detalhes</span>
-                    </Link>
-                  </div>
-                </div>
-              ))}
+                )
+              )}
             </div>
           </CardContent>
         </Card>
       )}
     </div>
   );
-} 
+}

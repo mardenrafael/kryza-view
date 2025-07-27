@@ -22,6 +22,7 @@ export function useSignUpForm() {
 
       toast.success("Cadastro realizado com sucesso!");
       router.push("/login");
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("Erro ao cadastrar usuário!");
     }

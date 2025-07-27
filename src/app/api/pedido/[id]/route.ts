@@ -124,16 +124,14 @@ export async function PUT(
     const parsedYear = parseInt(constructionYear);
     const parsedPropertyType = parseInt(propertyTypeId);
 
-    // Atualiza o pedido
-    const updatedOrder = await PrismaInstance.order.update({
+    await PrismaInstance.order.update({
       where: { id: id },
       data: {
         name: orderName,
       },
     });
 
-    // Atualiza a propriedade
-    const updatedProperty = await PrismaInstance.property.update({
+    await PrismaInstance.property.update({
       where: { id: existingOrder.property.id },
       data: {
         addressCity,

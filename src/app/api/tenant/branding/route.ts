@@ -1,6 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getTenantBranding, saveTenantBranding } from "@/service/tenant-admin-service";
 import { handlePrismaError } from "@/lib/prisma";
+import {
+  getTenantBranding,
+  saveTenantBranding,
+} from "@/service/tenant-admin-service";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
@@ -49,7 +52,6 @@ export async function POST(request: NextRequest) {
       contactPhone,
       address,
       socialMedia,
-      customCss,
     } = body;
 
     if (!tenantId || !companyName) {
@@ -100,7 +102,6 @@ export async function PUT(request: NextRequest) {
       contactPhone,
       address,
       socialMedia,
-      customCss,
     } = body;
 
     if (!tenantId || !companyName) {
@@ -133,4 +134,4 @@ export async function PUT(request: NextRequest) {
       { status: prismaError.status }
     );
   }
-} 
+}
