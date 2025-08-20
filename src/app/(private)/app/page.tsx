@@ -18,6 +18,7 @@ import {
   PlusIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { translateOrderStatus } from "@/lib/order-utils";
 
 interface UserDashboardStats {
   totalOrders: number;
@@ -225,11 +226,7 @@ export default function UserDashboardPage() {
                             : "outline"
                         }
                       >
-                        {order.status.name === "PENDING"
-                          ? "Pendente"
-                          : order.status.name === "COMPLETED"
-                          ? "Concluído"
-                          : order.status.name}
+                        {translateOrderStatus(order.status.name)}
                       </Badge>
                       <Link href={`/app/pedido/${order.id}`}>
                         <span className="text-sm text-primary hover:underline">

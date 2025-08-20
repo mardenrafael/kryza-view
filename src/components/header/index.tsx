@@ -18,13 +18,13 @@ export function Header() {
   return (
     <header className="w-full border-b border-border bg-background">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link
-          prefetch={false}
-          href="/"
-          className="flex items-center gap-2"
-        >
+        <Link prefetch={false} href="/" className="flex items-center gap-2">
           {branding?.logoUrl ? (
-            <img src={branding.logoUrl} alt="Logo" className="h-8 w-auto max-w-[120px] object-contain" />
+            <img
+              src={branding.logoUrl}
+              alt="Logo"
+              className="h-8 w-auto max-w-[120px] object-contain"
+            />
           ) : null}
           <span className="text-2xl font-bold text-primary">
             {branding?.companyName || siteConfig.name}
@@ -127,7 +127,7 @@ function HeaderActions() {
       ) : (
         <>
           {isRootPath && (
-            <Link href="/dashboard">
+            <Link href="/admin/dashboard">
               <Button size="sm" className="cursor-pointer">
                 Dashboard
               </Button>
