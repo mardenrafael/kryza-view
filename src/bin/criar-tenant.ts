@@ -5,13 +5,26 @@ import { CONSTANTS } from "../constants";
 import { hash } from "../lib/crypto";
 
 async function main() {
+  const { database_url } = await inquirer.prompt([
+    {
+      type: "input",
+      name: "database_url",
+      message: "Digite a DATABASE_URL do banco de dados",
+      default: process.env.DATABASE_URL,
+    },
+  ]);
+
   const prisma = new PrismaClient({
     datasources: {
       db: {
-        url: process.env.DATABASE_URL,
+        url: database_url,
       },
     },
   });
+
+  console.log("Conectando ao banco de dados...");
+  await prisma.$connect();
+  console.log("Conexão com o banco de dados estabelecida.");
 
   const { name, email, password, slug, domain } = await inquirer.prompt([
     {
@@ -40,10 +53,6 @@ async function main() {
       message: "Digite o domínio do usuário",
     },
   ]);
-
-  console.log("Conectando ao banco de dados...");
-  await prisma.$connect();
-  console.log("Conexão com o banco de dados estabelecida.");
 
   try {
     console.log("Criando tenant...");

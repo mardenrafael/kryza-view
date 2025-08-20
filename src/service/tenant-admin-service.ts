@@ -41,7 +41,9 @@ export interface TenantData {
   };
 }
 
-async function getTenantBranding(tenantId: string): Promise<TenantBrandingData | null> {
+async function getTenantBranding(
+  tenantId: string
+): Promise<TenantBrandingData | null> {
   const branding = await PrismaInstance.tenantBranding.findUnique({
     where: { tenantId },
   });
@@ -49,7 +51,9 @@ async function getTenantBranding(tenantId: string): Promise<TenantBrandingData |
   return branding;
 }
 
-async function saveTenantBranding(data: TenantBrandingData): Promise<TenantBrandingData> {
+async function saveTenantBranding(
+  data: TenantBrandingData
+): Promise<TenantBrandingData> {
   const branding = await PrismaInstance.tenantBranding.upsert({
     where: { tenantId: data.tenantId },
     update: {
@@ -93,4 +97,4 @@ async function markFirstAccessComplete(tenantId: string): Promise<void> {
   });
 }
 
-export { getTenantBranding, saveTenantBranding, markFirstAccessComplete }; 
+export { getTenantBranding, saveTenantBranding, markFirstAccessComplete };

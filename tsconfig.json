@@ -34,7 +34,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "prisma/seed.mts",
-    "src/cli/index.ts"
+    "src/cli/index.cts"
   ],
   "exclude": ["node_modules"]
 }
