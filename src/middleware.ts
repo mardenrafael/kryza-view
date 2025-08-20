@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSubdomain } from "@/lib/utils";
 import { ErrorType } from "@/lib/error-types";
 
-const PUBLIC_ROUTES = ["/login", "/signup"];
+const PUBLIC_ROUTES = ["/login", "/signup", "/uploads"];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
