@@ -1,3 +1,5 @@
+"use client";
+
 import { api } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -20,7 +22,6 @@ export function useEditarPedidoForm(orderId: string) {
       toast.success("Pedido atualizado com sucesso");
       router.push(`/app/pedido/${orderId}`);
     } catch (error) {
-      console.error("Erro ao atualizar pedido:", error);
       toast.error("Erro ao atualizar pedido");
     }
   }

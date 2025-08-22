@@ -4,7 +4,13 @@ import { api } from "@/lib/api";
 import { ErrorType } from "@/lib/error-types";
 import { motion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
-import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  PropsWithChildren,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 export type BrandingType = {
   primaryColor?: string;
@@ -52,13 +58,23 @@ export function TenantProvider({ children }: TenantProviderProps) {
           setTenantId(tenantId);
           // Buscar branding
           try {
-            const brandingResp = await api.get(`/api/tenant/branding?tenantId=${tenantId}`);
+            const brandingResp = await api.get(
+              `/api/tenant/branding?tenantId=${tenantId}`
+            );
             setBranding(brandingResp.data);
-            // Aplicar cores dinamicamente
             if (brandingResp.data) {
-              document.documentElement.style.setProperty("--primary", brandingResp.data.primaryColor || "#d7263d");
-              document.documentElement.style.setProperty("--secondary", brandingResp.data.secondaryColor || "#f9fafb");
-              document.documentElement.style.setProperty("--accent", brandingResp.data.accentColor || "#1f2937");
+              document.documentElement.style.setProperty(
+                "--primary",
+                brandingResp.data.primaryColor || "#d7263d"
+              );
+              document.documentElement.style.setProperty(
+                "--secondary",
+                brandingResp.data.secondaryColor || "#f9fafb"
+              );
+              document.documentElement.style.setProperty(
+                "--accent",
+                brandingResp.data.accentColor || "#1f2937"
+              );
             }
           } catch (e) {
             setBranding(null);
@@ -74,7 +90,6 @@ export function TenantProvider({ children }: TenantProviderProps) {
       } catch (error) {
         const errorUrl = new URL("/error", window.location.origin);
         errorUrl.searchParams.set("error", ErrorType.SUBDOMAIN_NOT_FOUND);
-        console.log("No subdomain found, redirecting to error page.");
         router.push(errorUrl.toString());
       } finally {
         setIsLoading(false);
@@ -85,12 +100,20 @@ export function TenantProvider({ children }: TenantProviderProps) {
     }
   }, [pathname]);
 
-  // Atualiza as cores sempre que o branding mudar
   useEffect(() => {
     if (branding) {
-      document.documentElement.style.setProperty("--primary", branding.primaryColor || "#d7263d");
-      document.documentElement.style.setProperty("--secondary", branding.secondaryColor || "#f9fafb");
-      document.documentElement.style.setProperty("--accent", branding.accentColor || "#1f2937");
+      document.documentElement.style.setProperty(
+        "--primary",
+        branding.primaryColor || "#d7263d"
+      );
+      document.documentElement.style.setProperty(
+        "--secondary",
+        branding.secondaryColor || "#f9fafb"
+      );
+      document.documentElement.style.setProperty(
+        "--accent",
+        branding.accentColor || "#1f2937"
+      );
     }
   }, [branding]);
 

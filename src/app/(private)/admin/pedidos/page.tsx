@@ -65,20 +65,17 @@ export default function AdminPedidosPage() {
   }, []);
 
   const fetchOrders = async () => {
-    console.log("[fetchOrders]");
     setLoading(true);
     try {
       const response = await api.get("/api/admin/pedidos");
       setOrders(response.data);
     } catch (error) {
-      console.error("Erro ao buscar pedidos:", error);
       toast.error("Erro ao carregar pedidos");
       setOrders([]);
     }
     setLoading(false);
   };
 
-  // Filter orders by selected status
   const filteredOrders =
     statusFilter === "all"
       ? orders
@@ -99,7 +96,6 @@ export default function AdminPedidosPage() {
         </div>
       </div>
 
-      {/* Filtro por situação */}
       <div className="mb-4 flex items-center gap-2">
         <label htmlFor="statusFilter" className="font-medium text-sm">
           Filtrar por situação:

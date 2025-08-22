@@ -50,8 +50,6 @@ export function Sidebar({ groups }: SidebarProps) {
   const isActive = (href: string) => {
     const currentPath = pathname;
 
-    console.log("Current Path:", currentPath);
-
     return currentPath === href;
   };
 

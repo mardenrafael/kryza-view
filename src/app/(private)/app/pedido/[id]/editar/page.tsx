@@ -121,7 +121,6 @@ export default function EditarPedidoPage() {
         description: orderData.property.description,
       });
 
-      // Converte imagens existentes para o formato esperado
       const existingImagesFormatted = orderData.property.propertyImage.map(
         (pi: { image: { id: string; url: string; description: string } }) => ({
           url: pi.image.url,
@@ -131,7 +130,6 @@ export default function EditarPedidoPage() {
       );
       setExistingImages(existingImagesFormatted);
     } catch (error) {
-      console.error("Erro ao buscar detalhes do pedido:", error);
       toast.error("Erro ao carregar detalhes do pedido");
       router.push("/app/pedido");
     }
@@ -153,7 +151,6 @@ export default function EditarPedidoPage() {
     price: string;
     description: string;
   }) => {
-    // Combina imagens existentes com novas imagens
     const allImages = [...existingImages, ...uploadedImages];
 
     const dataWithImages = {

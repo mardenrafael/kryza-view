@@ -1,10 +1,11 @@
+import { isValidHash } from "@/lib/crypto";
+import { getLoggerContext } from "@/lib/logger";
+import PrismaInstance from "@/lib/prisma";
+import { getSubdomain } from "@/lib/utils";
 import { signInSchema } from "@/lib/zod";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { ZodError } from "zod";
-import { isValidHash } from "./crypto";
-import PrismaInstance from "./prisma";
-import { getSubdomain } from "./utils";
 
 declare module "next-auth" {
   interface Session {
@@ -38,6 +39,7 @@ export const { auth, handlers, signIn } = NextAuth({
         },
       },
       authorize: async (credentials, req: Request) => {
+        const log = getLoggerContext(req);
         try {
           const { email, password } = await signInSchema.parseAsync(
             credentials
@@ -45,7 +47,10 @@ export const { auth, handlers, signIn } = NextAuth({
           const host = req.headers.get("host");
           const subdomain = getSubdomain(host);
 
-          if (!subdomain) return null;
+          if (!subdomain) {
+            log.warn("Subdomain not found in request headers");
+            return null;
+          }
 
           const tenant = await PrismaInstance.tenant.findUnique({
             where: {
@@ -53,7 +58,10 @@ export const { auth, handlers, signIn } = NextAuth({
             },
           });
 
-          if (!tenant) return null;
+          if (!tenant) {
+            log.warn(`Tenant not found for subdomain: ${subdomain}`);
+            return null;
+          }
 
           const user = await PrismaInstance.user.findFirst({
             where: {
@@ -62,12 +70,18 @@ export const { auth, handlers, signIn } = NextAuth({
             },
           });
 
-          console.log(tenant.id);
-
-          if (!user) return null;
+          if (!user) {
+            log.warn(
+              `User not found for email: ${email} in tenant: ${tenant.slug}`
+            );
+            return null;
+          }
 
           const isPasswordValid = await isValidHash(password, user.password);
-          if (!isPasswordValid) return null;
+          if (!isPasswordValid) {
+            log.warn(`Invalid password for user ${email}`);
+            return null;
+          }
 
           return {
             id: user.id,

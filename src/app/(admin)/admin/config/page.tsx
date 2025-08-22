@@ -18,10 +18,10 @@ import { TenantBrandingData } from "@/service/tenant-admin-service";
 import { isAxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function ConfigPage() {
   const { data: session, status } = useSession();
-  console.log("Session hook:", { session, status });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isFirstAccess, setIsFirstAccess] = useState(false);
@@ -42,11 +42,6 @@ export default function ConfigPage() {
   const { setBranding } = useTenant();
 
   useEffect(() => {
-    console.log("useEffect disparado", {
-      session,
-      status,
-      tenantId: session?.tenantId,
-    });
     if (session?.tenantId) {
       loadBrandingData();
       checkFirstAccess();
@@ -57,29 +52,25 @@ export default function ConfigPage() {
   const checkFirstAccess = async () => {
     try {
       if (session?.tenantId) {
-        console.log("Verificando firstAccess para", session.tenantId);
         const response = await api.get(
           `/api/tenant/first-access?tenantId=${session.tenantId}`
         );
         const { firstAccess } = response.data;
         setIsFirstAccess(firstAccess);
-        console.log("Resultado firstAccess:", firstAccess);
       }
     } catch (error) {
-      console.error("Erro ao verificar primeiro acesso:", error);
+      toast.error("Erro ao verificar primeiro acesso");
     }
   };
 
   const loadBrandingData = async () => {
     try {
       setLoading(true);
-      console.log("Iniciando loadBrandingData", session?.tenantId);
       if (session?.tenantId) {
         const response = await api.get(
           `/api/tenant/branding?tenantId=${session.tenantId}`
         );
         const branding = response.data;
-        console.log("Branding retornado:", branding);
 
         if (branding) {
           setFormData({
@@ -87,12 +78,11 @@ export default function ConfigPage() {
             tenantId: session.tenantId as string,
           });
         } else {
-          // Configuração padrão baseada no globals.css
           setFormData({
             tenantId: session.tenantId as string,
-            primaryColor: "#d7263d", // Vermelho principal do sistema
-            secondaryColor: "#f9fafb", // Cinza claro
-            accentColor: "#1f2937", // Cinza escuro
+            primaryColor: "#d7263d",
+            secondaryColor: "#f9fafb",
+            accentColor: "#1f2937",
             companyName: "",
             companySlogan: "",
             contactEmail: "",
@@ -107,12 +97,11 @@ export default function ConfigPage() {
     } catch (error) {
       if (isAxiosError(error)) {
         if (error.response?.status !== 404) {
-          console.error("Erro ao carregar configuração de branding:", error);
+          toast.error("Erro ao carregar configurações");
         }
       }
     } finally {
       setLoading(false);
-      console.log("Finalizou loading");
     }
   };
 
@@ -139,7 +128,7 @@ export default function ConfigPage() {
         }
       }
     } catch (error) {
-      console.error("Erro ao salvar configuração de branding:", error);
+      toast.error("Erro ao salvar configurações");
     } finally {
       setSaving(false);
     }

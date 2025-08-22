@@ -80,7 +80,6 @@ export default function PedidoDetalhesPage() {
       const response = await api.get(`/api/pedido/${orderId}`);
       setOrder(response.data);
     } catch (error) {
-      console.error("Erro ao buscar detalhes do pedido:", error);
       toast.error("Erro ao carregar detalhes do pedido");
       router.push("/app/pedido");
     }

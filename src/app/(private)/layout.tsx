@@ -12,20 +12,13 @@ export default function PrivateLayout({ children }: PropsWithChildren) {
   useEffect(() => {
     if (!loading) {
       if (isOwner && pathname === "/admin") {
-        // Se é proprietário, redireciona para área administrativa
-        console.log("[PrivateLayout] isOwner", isOwner);
         router.push("/admin/dashboard");
       } else if (!isOwner && pathname === "/app") {
-        // Se é usuário final, redireciona para área de usuários
-        console.log("[PrivateLayout] isOwner", isOwner);
         router.push("/app");
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOwner, loading, router]);
-
-  console.log("[PrivateLayout] isOwner 2", isOwner);
-  console.log("[PrivateLayout] loading 2", loading);
 
   if (loading) {
     return (

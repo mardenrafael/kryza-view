@@ -21,17 +21,6 @@ export default function PedidoNovoPage() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmit = async (data: any) => {
-    console.log("📝 Dados do formulário:", data);
-    console.log("🖼️ Imagens carregadas:", uploadedImages);
-
-    // Validação específica para propertyTypeId
-    if (!data.propertyTypeId) {
-      console.error("❌ propertyTypeId está vazio ou undefined!");
-    } else {
-      console.log("✅ propertyTypeId tem valor:", data.propertyTypeId);
-    }
-
-    // Validação para outros campos importantes
     const requiredFields = [
       "orderName",
       "addressStreet",
@@ -46,18 +35,6 @@ export default function PedidoNovoPage() {
       "description",
     ];
 
-    requiredFields.forEach((field) => {
-      if (!data[field]) {
-        console.error(`❌ Campo obrigatório '${field}' está vazio!`);
-      } else {
-        console.log(`✅ Campo '${field}' tem valor:`, data[field]);
-      }
-    });
-
-    console.log("📦 Dados finais enviados para API:", data);
-    console.log("📊 Quantidade de imagens:", uploadedImages.length);
-
-    // Chama o onSubmit original passando as imagens como segundo parâmetro
     await onSubmit(data, uploadedImages);
   };
 

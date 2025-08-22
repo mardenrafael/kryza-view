@@ -1,10 +1,11 @@
 "use client";
 
 import { Header } from "@/components/header";
-import { PropsWithChildren, useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter, usePathname } from "next/navigation";
 import { getIsfirstAcessByTenantId } from "@/service/tenant-service";
+import { useSession } from "next-auth/react";
+import { usePathname, useRouter } from "next/navigation";
+import { PropsWithChildren, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function AdminLayout({ children }: PropsWithChildren) {
   const { data: session, status } = useSession();
@@ -15,7 +16,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
   useEffect(() => {
     const checkFirstAccess = async () => {
       if (status === "loading") return;
-      
+
       if (status === "unauthenticated") {
         router.push("/login");
         return;
@@ -23,16 +24,18 @@ export default function AdminLayout({ children }: PropsWithChildren) {
 
       if (session?.tenantId && pathname !== "/admin/config") {
         try {
-          const isFirstAccess = await getIsfirstAcessByTenantId(session.tenantId as string);
+          const isFirstAccess = await getIsfirstAcessByTenantId(
+            session.tenantId as string
+          );
           if (isFirstAccess) {
             router.push("/admin/config");
             return;
           }
         } catch (error) {
-          console.error("Erro ao verificar primeiro acesso:", error);
+          toast.error("Erro ao verificar o primeiro acesso");
         }
       }
-      
+
       setChecking(false);
     };
 

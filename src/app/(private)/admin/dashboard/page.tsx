@@ -17,6 +17,7 @@ import {
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface DashboardStats {
   totalOrders: number;
@@ -54,7 +55,7 @@ export default function AdminDashboardPage() {
 
         setStats(stats);
       } catch (error) {
-        console.error("Erro ao carregar estatísticas:", error);
+        toast.error("Erro ao carregar estatísticas");
       } finally {
         setLoading(false);
       }

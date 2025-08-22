@@ -21,55 +21,55 @@ interface ImageUploadProps {
   className?: string;
 }
 
-export function ImageUpload({ onImagesUploaded, maxFiles = 5, className }: ImageUploadProps) {
+export function ImageUpload({
+  onImagesUploaded,
+  maxFiles = 5,
+  className,
+}: ImageUploadProps) {
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [uploading, setUploading] = useState(false);
 
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    console.log("📁 Arquivos aceitos:", acceptedFiles);
-    console.log("📊 Imagens já carregadas:", uploadedImages.length);
-    console.log("📈 Máximo permitido:", maxFiles);
-    
-    if (uploadedImages.length + acceptedFiles.length > maxFiles) {
-      toast.error(`Máximo de ${maxFiles} imagens permitido`);
-      return;
-    }
-
-    setUploading(true);
-    const formData = new FormData();
-    
-    acceptedFiles.forEach((file) => {
-      formData.append("files", file);
-      console.log("📎 Adicionando arquivo ao FormData:", file.name);
-    });
-
-    try {
-      console.log("🚀 Iniciando upload para /api/upload");
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Erro no upload");
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      if (uploadedImages.length + acceptedFiles.length > maxFiles) {
+        toast.error(`Máximo de ${maxFiles} imagens permitido`);
+        return;
       }
 
-      const data = await response.json();
-      console.log("✅ Resposta do upload:", data);
-      
-      const newImages = [...uploadedImages, ...data.images];
-      console.log("🖼️ Novas imagens após upload:", newImages);
-      
-      setUploadedImages(newImages);
-      onImagesUploaded(newImages);
-      toast.success(`${acceptedFiles.length} imagem(ns) enviada(s) com sucesso!`);
-    } catch (error) {
-      console.error("❌ Erro no upload:", error);
-      toast.error("Erro ao enviar imagens");
-    } finally {
-      setUploading(false);
-    }
-  }, [uploadedImages, maxFiles, onImagesUploaded]);
+      setUploading(true);
+      const formData = new FormData();
+
+      acceptedFiles.forEach((file) => {
+        formData.append("files", file);
+      });
+
+      try {
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("Erro no upload");
+        }
+
+        const data = await response.json();
+        const newImages = [...uploadedImages, ...data.images];
+
+        setUploadedImages(newImages);
+        onImagesUploaded(newImages);
+        toast.success(
+          `${acceptedFiles.length} imagem(ns) enviada(s) com sucesso!`
+        );
+      } catch (error) {
+        console.error("❌ Erro no upload:", error);
+        toast.error("Erro ao enviar imagens");
+      } finally {
+        setUploading(false);
+      }
+    },
+    [uploadedImages, maxFiles, onImagesUploaded]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -160,4 +160,4 @@ export function ImageUpload({ onImagesUploaded, maxFiles = 5, className }: Image
       )}
     </div>
   );
-} 
+}

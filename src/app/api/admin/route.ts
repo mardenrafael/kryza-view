@@ -1,8 +1,11 @@
+import { getLoggerContext } from "@/lib/logger";
 import PrismaInstance from "@/lib/prisma";
 import { getUserData } from "@/lib/utils";
-import { NextResponse } from "next/server"; 
+import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
+  const log = getLoggerContext(req);
+
   try {
     const token = await getUserData(req);
 
@@ -13,7 +16,6 @@ export async function GET(req: Request) {
       );
     }
 
-    // Verifica se o usuário é o proprietário do tenant
     const user = await PrismaInstance.user.findUnique({
       where: { id: token.sub },
       include: {
@@ -28,15 +30,16 @@ export async function GET(req: Request) {
 
     if (!user || !user.tenant || user.tenant.userOwnerId !== token.sub) {
       return NextResponse.json(
-        { error: "Acesso negado. Apenas o proprietário do tenant pode acessar." },
+        {
+          error: "Acesso negado. Apenas o proprietário do tenant pode acessar.",
+        },
         { status: 403 }
       );
     }
 
     return NextResponse.json({ message: "Acesso permitido" }, { status: 200 });
-
   } catch (error) {
-    console.error(error);
+    log.error(error, "Error on get user permission");
     return NextResponse.json(
       { error: "Failed to fetch orders" },
       { status: 500 }
@@ -45,17 +48,18 @@ export async function GET(req: Request) {
 }
 
 export async function PATCH(req: Request) {
+  const log = getLoggerContext(req);
   try {
     const token = await getUserData(req);
 
     if (!token.sub) {
+      log.warn("");
       return NextResponse.json(
         { error: "User ID is required" },
         { status: 403 }
       );
     }
 
-    // Verifica se o usuário é o proprietário do tenant
     const user = await PrismaInstance.user.findUnique({
       where: { id: token.sub },
       include: {
@@ -70,7 +74,10 @@ export async function PATCH(req: Request) {
 
     if (!user || !user.tenant || user.tenant.userOwnerId !== token.sub) {
       return NextResponse.json(
-        { error: "Acesso negado. Apenas o proprietário do tenant pode alterar pedidos." },
+        {
+          error:
+            "Acesso negado. Apenas o proprietário do tenant pode alterar pedidos.",
+        },
         { status: 403 }
       );
     }
@@ -84,7 +91,6 @@ export async function PATCH(req: Request) {
       );
     }
 
-    // Verifica se o pedido pertence ao tenant do usuário
     const order = await PrismaInstance.order.findFirst({
       where: {
         id: orderId,
@@ -93,13 +99,9 @@ export async function PATCH(req: Request) {
     });
 
     if (!order) {
-      return NextResponse.json(
-        { error: "Order not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // Atualiza a situação do pedido
     const updatedOrder = await PrismaInstance.order.update({
       where: { id: orderId },
       data: { statusId: parseInt(statusId) },
@@ -147,4 +149,4 @@ export async function PATCH(req: Request) {
       { status: 500 }
     );
   }
-} 
+}

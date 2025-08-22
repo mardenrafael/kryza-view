@@ -1,22 +1,27 @@
 import { SituationEnum } from "@/dd";
+import { getLoggerContext } from "@/lib/logger";
 import { generateUniqueCode } from "@/lib/order-utils";
 import PrismaInstance from "@/lib/prisma";
 import { getUserData } from "@/lib/utils";
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
+  const log = getLoggerContext(request);
+
   try {
-    const token = await getUserData(req);
+    const token = await getUserData(request);
 
     if (!token.sub) {
+      log.warn("User ID is required but not found in token");
+
       return NextResponse.json(
         { error: "User ID is required" },
         { status: 403 }
       );
     }
 
-    const body = await req.json();
-    console.log("📦 Dados recebidos na API:", JSON.stringify(body, null, 2));
+    const body = await request.json();
+    log.debug(body, "Body received in POST /api/pedido");
 
     const {
       addressCity,
@@ -35,20 +40,22 @@ export async function POST(req: Request) {
       images,
     } = body;
 
-    console.log("🖼️ Imagens recebidas:", images);
-    console.log("📊 Quantidade de imagens:", images ? images.length : 0);
+    log.debug(images, "Received images in POST /api/pedido");
 
     const parsedPrice = parseInt(price);
     const parsedArea = parseFloat(totalArea);
     const parsedYear = parseInt(constructionYear);
     const parsedPropertyType = parseInt(propertyTypeId);
 
-    console.log("🔧 Dados processados:", {
-      parsedPrice,
-      parsedArea,
-      parsedYear,
-      parsedPropertyType,
-    });
+    log.debug(
+      {
+        parsedPrice,
+        parsedArea,
+        parsedYear,
+        parsedPropertyType,
+      },
+      "Parsed values from request body"
+    );
 
     const property = await PrismaInstance.property.create({
       data: {
@@ -81,7 +88,7 @@ export async function POST(req: Request) {
       },
     });
 
-    console.log("🏠 Propriedade criada:", property.id);
+    log.debug(property, "Property created");
 
     const orderCode = await generateUniqueCode(token.sub!, token.tenantId!);
 
@@ -96,17 +103,15 @@ export async function POST(req: Request) {
       },
     });
 
-    console.log("📋 Pedido criado:", order.id);
+    log.debug(order, "Order created");
 
-    // Salvar imagens se fornecidas
     if (images && images.length > 0) {
-      console.log("💾 Iniciando salvamento de imagens...");
-      
+      log.debug("Processing images:", images);
+
       for (const imageData of images) {
-        console.log("🖼️ Processando imagem:", imageData);
-        
+        log.debug("Processing image:", imageData);
+
         try {
-          // Criar registro de imagem
           const image = await PrismaInstance.image.create({
             data: {
               url: imageData.url,
@@ -114,9 +119,7 @@ export async function POST(req: Request) {
             },
           });
 
-          console.log("📸 Imagem criada:", image.id);
-
-          // Criar relação entre propriedade e imagem
+          log.debug(image, "Image created");
           const propertyImage = await PrismaInstance.propertyImage.create({
             data: {
               propertyId: property.id,
@@ -124,15 +127,15 @@ export async function POST(req: Request) {
             },
           });
 
-          console.log("🔗 Relação PropertyImage criada:", propertyImage.id);
+          log.debug(propertyImage, "PropertyImage relation created");
         } catch (error) {
-          console.error("❌ Erro ao processar imagem:", imageData, error);
+          log.error(imageData, "Error processing image");
         }
       }
-      
-      console.log("✅ Processamento de imagens concluído");
+
+      log.debug("Image processing completed");
     } else {
-      console.log("ℹ️ Nenhuma imagem fornecida");
+      log.debug("No images provided");
     }
 
     return NextResponse.json(
@@ -142,7 +145,7 @@ export async function POST(req: Request) {
       }
     );
   } catch (error) {
-    console.error("❌ Erro geral na API:", error);
+    log.error(error, "General error in API");
     return NextResponse.json(
       { error: "Failed to create order" },
       { status: 500 }
@@ -196,7 +199,7 @@ export async function GET(req: Request) {
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
     return NextResponse.json(orders);

@@ -1,24 +1,25 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { useSession } from "next-auth/react";
 import { api } from "@/lib/api";
-import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { translateOrderStatus } from "@/lib/order-utils";
 import {
   BaggageClaimIcon,
   ClockIcon,
-  TrendingUpIcon,
   PlusIcon,
+  TrendingUpIcon,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { translateOrderStatus } from "@/lib/order-utils";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface UserDashboardStats {
   totalOrders: number;
@@ -55,12 +56,12 @@ export default function UserDashboardPage() {
             (order: { status: { name: string } }) =>
               order.status.name === "COMPLETED"
           ).length,
-          recentOrders: orders.slice(0, 5), // Últimos 5 pedidos
+          recentOrders: orders.slice(0, 5),
         };
 
         setStats(stats);
       } catch (error) {
-        console.error("Erro ao carregar estatísticas:", error);
+        toast.error("Erro ao carregar estatísticas");
       } finally {
         setLoading(false);
       }

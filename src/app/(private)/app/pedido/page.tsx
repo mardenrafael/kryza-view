@@ -53,7 +53,7 @@ export default function PedidosPage() {
       const response = await api.get("/api/pedido");
       setOrders(response.data);
     } catch (error) {
-      console.error("Erro ao buscar pedidos:", error);
+      toast.error("Erro ao buscar pedidos");
       setOrders([]);
     }
     setLoading(false);
@@ -64,8 +64,6 @@ export default function PedidosPage() {
       await api.delete(`/api/pedido/${id}`);
       fetchOrders();
     } catch (error) {
-      console.error("Erro ao cancelar pedido:", error);
-
       if (isAxiosError(error)) {
         if (error.response?.status === 403) {
           toast.error("Você não tem permissão para cancelar este pedido.");
