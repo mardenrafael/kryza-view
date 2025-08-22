@@ -63,3 +63,14 @@ jobs:
           TAGS: ${{ steps.meta.outputs.tags }}
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Chamar webhook da Northflank
+        run: |
+          curl -X POST \
+          -H "Content-Type: application/json" \
+          "${{ secrets.NORTHFLANK_WEBHOOK_URL }}"
+
+      
