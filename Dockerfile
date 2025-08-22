@@ -22,7 +22,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma/migrations ./prisma/migrations
 COPY --from=builder /app/prisma/schema.prisma ./prisma/schema.prisma
 
-RUN npm install --only=production
+RUN npm install --omit=dev
 RUN npx prisma generate
 
 
