@@ -20,7 +20,6 @@ COPY --from=builder /app/package.json ./
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma/migrations ./prisma/migrations
-COPY --from=builder /app/dist/src ./src/
 COPY --from=builder /app/prisma/schema.prisma ./prisma/schema.prisma
 
 RUN npm install --only=production
